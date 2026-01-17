@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "target": "ES2016",
+    "module": "commonjs",
+    "rootDirs": [
+      "./src",
+      "./seeder"
+    ],
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "typeRoots": [
+      "./types"
+    ],
+    "paths": {
+      "@models/*": [
+        "src/models/*"
+      ],
+      "@routers/*": [
+        "src/routers/*"
+      ],
+      "@schemas/*": [
+        "src/schemas/*"
+      ],
+      "@middlewares/*": [
+        "src/middlewares/*"
+      ],
+      "@lib/*": [
+        "src/lib/*"
+      ],
+      "@controllers/*": [
+        "src/controllers/*"
+      ],
+      "@/*": [
+        "src/*"
+      ]
+    }
+  }
+}

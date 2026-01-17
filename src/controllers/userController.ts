@@ -1,6 +1,7 @@
-const models = require("../models");
+import type { Request, Response } from "express";
+import models from "../models/index.js";
 
-const browse = (req, res) => {
+const browse = (req: Request, res: Response) => {
   models.user
     .findAll()
     .then((rows) => {
@@ -12,7 +13,7 @@ const browse = (req, res) => {
     });
 };
 
-const read = (req, res) => {
+const read = (req: Request, res: Response) => {
   models.user
     .find(req.params.id)
     .then((row) => {
@@ -28,7 +29,7 @@ const read = (req, res) => {
     });
 };
 
-const edit = (req, res) => {
+const edit = (req: Request, res: Response) => {
   const user = req.body;
 
   // TODO validations (length, format...)
@@ -37,8 +38,8 @@ const edit = (req, res) => {
 
   models.user
     .update(user)
-    .then(([result]) => {
-      if (result.affectedRows === 0) {
+    .then((result) => {
+      if (result === null) {
         res.sendStatus(404);
       } else {
         res.sendStatus(204);
@@ -50,15 +51,15 @@ const edit = (req, res) => {
     });
 };
 
-const add = (req, res) => {
+const add = (req: Request, res: Response) => {
   const user = req.body;
 
   // TODO validations (length, format...)
 
   models.user
-    .insert(user)
-    .then(([result]) => {
-      res.location(`/users/${result.insertId}`).sendStatus(201);
+    .create(user)
+    .then((result) => {
+      res.location(`/users/${result.id}`).sendStatus(201);
     })
     .catch((err) => {
       console.error(err);
@@ -66,11 +67,11 @@ const add = (req, res) => {
     });
 };
 
-const destroy = (req, res) => {
+const destroy = (req: Request, res: Response) => {
   models.user
     .delete(req.params.id)
-    .then(([result]) => {
-      if (result.affectedRows === 0) {
+    .then((result) => {
+      if (result === null) {
         res.sendStatus(404);
       } else {
         res.sendStatus(204);
@@ -82,10 +83,4 @@ const destroy = (req, res) => {
     });
 };
 
-module.exports = {
-  browse,
-  read,
-  edit,
-  add,
-  destroy,
-};
+export default { browse, read, edit, add, destroy };
