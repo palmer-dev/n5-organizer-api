@@ -1,4 +1,6 @@
 import express from "express";
+import { param } from "express-validator";
+import { Types } from "mongoose";
 import agendaController from "../controllers/agendaController";
 
 const router = express.Router();
@@ -11,6 +13,11 @@ router.route("/").get(agendaController.browse).post(agendaController.add);
 // DELETE /api/agendas/:id
 router
   .route("/:id")
+  .all(
+    param("id")
+      .custom((value: string) => Types.ObjectId.isValid(value))
+      .customSanitizer((value: string) => new Types.ObjectId(value))
+  )
   .get(agendaController.read)
   .put(agendaController.edit)
   .delete(agendaController.destroy);

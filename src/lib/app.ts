@@ -32,5 +32,6 @@ app.use(express.json());
 
 // import and mount the API routes
 app.use("/api", requireAuth, api);
+// app.use("/api", api);
 
 export default app;

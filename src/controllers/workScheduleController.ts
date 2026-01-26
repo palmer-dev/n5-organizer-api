@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import models from "../models/index.js";
 
-const browse = (req: Request, res: Response) => {
+const browse = async (req: Request, res: Response) => {
   models.workSchedule
     .findAll()
     .then((rows) => {
@@ -13,7 +13,7 @@ const browse = (req: Request, res: Response) => {
     });
 };
 
-const read = (req: Request, res: Response) => {
+const read = async (req: Request, res: Response) => {
   models.workSchedule
     .find(req.params.id)
     .then((row) => {
@@ -29,7 +29,7 @@ const read = (req: Request, res: Response) => {
     });
 };
 
-const edit = (req: Request, res: Response) => {
+const edit = async (req: Request, res: Response) => {
   const workSchedule = req.body;
 
   // TODO validations (length, format...)
@@ -51,7 +51,7 @@ const edit = (req: Request, res: Response) => {
     });
 };
 
-const add = (req: Request, res: Response) => {
+const add = async (req: Request, res: Response) => {
   const workSchedule = req.body;
 
   // TODO validations (length, format...)
@@ -67,7 +67,7 @@ const add = (req: Request, res: Response) => {
     });
 };
 
-const destroy = (req: Request, res: Response) => {
+const destroy = async (req: Request, res: Response) => {
   models.workSchedule
     .delete(req.params.id)
     .then((result) => {

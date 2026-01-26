@@ -1,5 +1,6 @@
+
 import { config } from "dotenv";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import UserManager from "@/models/UserManager";
 import AppointmentManager from "@/models/AppointmentManager";
 import AgendaManager from "@/models/AgendaManager";
@@ -45,4 +46,19 @@ const handler = {
   },
 };
 
-export default new Proxy(models, handler);
+function forUser(userId: Types.ObjectId) {
+  const userModels = {
+    appointment: new AppointmentManager(userId),
+    agenda: new AgendaManager(userId),
+    workSchedule: new WorkScheduleManager(userId),
+    externalAgenda: new ExternalAgendManager(userId),
+    // volontairement PAS user
+  };
+
+  return new Proxy(userModels, handler);
+}
+
+export default {
+  ...new Proxy(models, handler),
+  forUser,
+};

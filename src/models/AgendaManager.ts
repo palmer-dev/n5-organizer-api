@@ -6,8 +6,8 @@ import { AppointmentDocument } from "@/types/AppointmentDocument";
 import Appointment from "@schemas/Appointment";
 
 class AgendaManager extends AbstractManager<AgendaDocument> {
-  constructor() {
-    super(Agenda);
+  constructor(userId?: Types.ObjectId) {
+    super(Agenda, userId);
   }
 
   // eslint-disable-next-line class-methods-use-this

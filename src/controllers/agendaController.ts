@@ -1,10 +1,12 @@
 import type { Request, Response } from "express";
 import models from "@models/index";
 import { AgendaDocument } from "@/types/AgendaDocument";
+import { Types } from "mongoose";
 
-const browse = (req: Request, res: Response) => {
-  models.agenda
-    .findAll()
+const browse = async (req: Request, res: Response) => {
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .agenda.findAll()
     .then((rows) => {
       res.send(rows);
     })
@@ -14,9 +16,10 @@ const browse = (req: Request, res: Response) => {
     });
 };
 
-const read = (req: Request, res: Response) => {
-  models.agenda
-    .find(req.params.id)
+const read = async (req: Request, res: Response) => {
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .agenda.find(req.params.id)
     .then((row) => {
       if (row == null) {
         res.sendStatus(404);
@@ -30,9 +33,10 @@ const read = (req: Request, res: Response) => {
     });
 };
 
-const getAppointments = (req: Request, res: Response) => {
-  models.agenda
-    .appointments(req.params.id)
+const getAppointments = async (req: Request, res: Response) => {
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .agenda.appointments(req.params.id)
     .then((row) => {
       if (row == null) {
         res.sendStatus(404);
@@ -46,15 +50,16 @@ const getAppointments = (req: Request, res: Response) => {
     });
 };
 
-const edit = (req: Request, res: Response) => {
+const edit = async (req: Request, res: Response) => {
   const agenda = req.body as AgendaDocument;
 
   // TODO validations (length, format...)
 
   agenda.id = parseInt(req.params.id, 10);
 
-  models.agenda
-    .update(agenda)
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .agenda.update(agenda)
     .then((result) => {
       if (result === null) {
         res.sendStatus(404);
@@ -68,13 +73,14 @@ const edit = (req: Request, res: Response) => {
     });
 };
 
-const add = (req: Request, res: Response) => {
+const add = async (req: Request, res: Response) => {
   const agenda = req.body;
 
   // TODO validations (length, format...)
 
-  models.agenda
-    .create(agenda)
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .agenda.create(agenda)
     .then((result) => {
       res.location(`/agendas/${result.id}`).sendStatus(201);
     })
@@ -84,9 +90,10 @@ const add = (req: Request, res: Response) => {
     });
 };
 
-const destroy = (req: Request, res: Response) => {
-  models.agenda
-    .delete(req.params.id)
+const destroy = async (req: Request, res: Response) => {
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .agenda.delete(req.params.id)
     .then((result) => {
       if (result === null) {
         res.sendStatus(404);

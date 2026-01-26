@@ -14,3 +14,9 @@ export interface IAppointmentDocument {
 export interface AppointmentDocument
   extends TimestampedDocument,
     IAppointmentDocument {}
+
+export type AppointmentAvailabilitySearch = {
+  startDate: Date;
+  endDate: Date;
+  users: Types.ObjectId[];
+};

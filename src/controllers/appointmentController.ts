@@ -1,7 +1,10 @@
+import { matchedData } from "express-validator";
 import type { Request, Response } from "express";
+import { AppointmentAvailabilitySearch } from "@/types/AppointmentDocument";
 import models from "../models/index.js";
+import { SlotsFinder } from "@/services/slotsFinder";
 
-const browse = (req: Request, res: Response) => {
+const browse = async (req: Request, res: Response) => {
   models.appointment
     .findAll()
     .then((rows) => {
@@ -13,7 +16,7 @@ const browse = (req: Request, res: Response) => {
     });
 };
 
-const read = (req: Request, res: Response) => {
+const read = async (req: Request, res: Response) => {
   models.appointment
     .find(req.params.id)
     .then((row) => {
@@ -29,7 +32,7 @@ const read = (req: Request, res: Response) => {
     });
 };
 
-const edit = (req: Request, res: Response) => {
+const edit = async (req: Request, res: Response) => {
   const appointment = req.body;
 
   // TODO validations (length, format...)
@@ -51,7 +54,7 @@ const edit = (req: Request, res: Response) => {
     });
 };
 
-const add = (req: Request, res: Response) => {
+const add = async (req: Request, res: Response) => {
   const appointment = req.body;
 
   // TODO validations (length, format...)
@@ -67,7 +70,33 @@ const add = (req: Request, res: Response) => {
     });
 };
 
-const destroy = (req: Request, res: Response) => {
+const search = async (req: Request, res: Response) => {
+  const searchQuery = matchedData(req);
+
+  try {
+    const existingAppointments = await models.appointment.search(
+      searchQuery as AppointmentAvailabilitySearch
+    );
+
+    const slotFinder = new SlotsFinder(
+      2,
+      searchQuery.startDate,
+      searchQuery.endDate
+    );
+
+    slotFinder.setAppointments(existingAppointments);
+
+    const availableSlots = slotFinder.getAvailableSlots();
+
+    // Returns the groupes slots for better visibility on the calendar
+    res.send(SlotsFinder.groupSlots(availableSlots));
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+};
+
+const destroy = async (req: Request, res: Response) => {
   models.appointment
     .delete(req.params.id)
     .then((result) => {
@@ -89,4 +118,5 @@ export default {
   edit,
   add,
   destroy,
+  search,
 };

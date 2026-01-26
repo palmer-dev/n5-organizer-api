@@ -21,7 +21,7 @@ async function seed() {
 
     const toLink = [];
     // eslint-disable-next-line no-shadow,no-plusplus
-    for (let i = 0; i < Math.random() * 5 + 1; i++) {
+    for (let i = 0; i < Math.random() * 2 + 1; i++) {
       const numberOfEntity = agendas.length;
       const index = faker.number.int({ min: 0, max: numberOfEntity - 1 });
       toLink.push(agendas[index].id);
