@@ -1,5 +1,5 @@
 import { model as Model } from "mongoose";
-import SchemaExtended from "@models/SchemaExtended";
+import { SchemaExtended } from "@models/SchemaExtended";
 import AgendaType from "@/types/AgendaType";
 import { AgendaDocument } from "@/types/AgendaDocument";
 

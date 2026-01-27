@@ -19,4 +19,5 @@ export type AppointmentAvailabilitySearch = {
   startDate: Date;
   endDate: Date;
   users: Types.ObjectId[];
+  ignoreId?: Types.ObjectId;
 };

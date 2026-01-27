@@ -31,6 +31,13 @@ router.route("/search").post(
       .custom((value) => Types.ObjectId.isValid(value))
       .customSanitizer((value: string) => new Types.ObjectId(value))
       .withMessage("Invalid users received"),
+    body("ignoreId")
+      .custom((value) => {
+        return value !== undefined ? Types.ObjectId.isValid(value) : true;
+      })
+      .customSanitizer((value: string | undefined) =>
+        value === undefined ? value : new Types.ObjectId(value)
+      ),
   ]),
   appointmentController.search
 );

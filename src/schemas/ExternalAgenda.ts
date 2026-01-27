@@ -1,5 +1,5 @@
 import { model as Model } from "mongoose";
-import SchemaExtended from "@models/SchemaExtended.js";
+import { SchemaExtended } from "@models/SchemaExtended.js";
 import { ExternalAgendaDocument } from "@/types/ExternalAgendaDocument";
 
 const schema = new SchemaExtended<ExternalAgendaDocument>(

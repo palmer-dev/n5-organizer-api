@@ -15,17 +15,22 @@ class AppointmentManager extends AbstractManager<AppointmentDocument> {
     startDate,
     endDate,
     users,
+    ignoreId,
   }: AppointmentAvailabilitySearch): Promise<AppointmentDocument[]> {
+    const matchStage: PipelineStage.Match["$match"] = {
+      startDate: { $lte: endDate },
+      endDate: { $gte: startDate },
+    };
+
+    // Ignore specific appointment
+    if (ignoreId) {
+      // eslint-disable-next-line no-underscore-dangle
+      matchStage._id = { $ne: new Types.ObjectId(ignoreId) };
+    }
+
     const searchAggregation: PipelineStage[] = [
       {
-        $match:
-          /**
-           * query: The query in MQL.
-           */
-          {
-            startDate: { $lte: endDate },
-            endDate: { $gte: startDate },
-          },
+        $match: matchStage,
       },
       {
         $lookup: {
@@ -36,23 +41,17 @@ class AppointmentManager extends AbstractManager<AppointmentDocument> {
         },
       },
       {
-        $match:
-          /**
-           * query: The query in MQL.
-           */
-          {
-            agendas: {
-              $elemMatch: {
-                user: {
-                  $in: users.map(u => new Types.ObjectId(u)),
-                },
+        $match: {
+          agendas: {
+            $elemMatch: {
+              user: {
+                $in: users.map((u) => new Types.ObjectId(u)),
               },
             },
           },
+        },
       },
     ];
-
-    console.log(searchAggregation);
 
     return this.model.aggregate(searchAggregation).exec();
   }
