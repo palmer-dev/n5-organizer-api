@@ -29,7 +29,6 @@ class AgendaManager extends AbstractManager<AgendaDocument> {
         {
           $match: this.userFilter(),
         },
-        // Récupération des appointments liés
         {
           $lookup: {
             from: "appointments",
@@ -38,48 +37,59 @@ class AgendaManager extends AbstractManager<AgendaDocument> {
             as: "appointments",
           },
         },
-        // Calcul des stats
+        {
+          $unwind: { path: "$appointments", preserveNullAndEmptyArrays: true },
+        },
         {
           $addFields: {
-            stats: {
-              appointmentsThisWeek: {
-                $size: {
-                  $filter: {
-                    input: "$appointments",
-                    as: "a",
-                    cond: {
-                      $and: [
-                        { $gte: ["$$a.startDate", startOfWeek] },
-                        { $lt: ["$$a.startDate", endOfWeek] },
-                      ],
+            isThisWeek: {
+              $and: [
+                { $gte: ["$appointments.startDate", startOfWeek] },
+                { $lt: ["$appointments.startDate", endOfWeek] },
+              ],
+            },
+            isWaitingValidation: {
+              $gt: [
+                {
+                  $size: {
+                    $filter: {
+                      input: "$appointments.agendas",
+                      as: "agendaItem",
+                      cond: {
+                        $and: [
+                          { $eq: ["$$agendaItem.agenda", "$_id"] },
+                          { $eq: ["$$agendaItem.status", "Pending"] },
+                        ],
+                      },
                     },
                   },
                 },
-              },
-              waitingValidation: {
-                $size: {
-                  $filter: {
-                    input: "$appointments",
-                    as: "a",
-                    cond: {
-                      $eq: [
-                        "$$a.status",
-                        AppointmentStatusType.Pending.toString(),
-                      ],
-                    },
-                  },
-                },
-              },
+                0,
+              ],
             },
           },
         },
-        // Nettoyage (on enlève la liste brute des RDV)
         {
-          $project: {
-            appointments: 0,
+          $group: {
+            _id: "$_id",
+            name: { $first: "$name" },
+            user: { $first: "$user" },
+            appointmentsThisWeek: { $sum: { $cond: ["$isThisWeek", 1, 0] } },
+            waitingValidation: {
+              $sum: { $cond: ["$isWaitingValidation", 1, 0] },
+            },
           },
         },
-        // Ajout du lien "user"
+        {
+          $project: {
+            name: 1,
+            user: 1,
+            stats: {
+              appointmentsThisWeek: "$appointmentsThisWeek",
+              waitingValidation: "$waitingValidation",
+            },
+          },
+        },
         {
           $lookup: {
             from: "users",
@@ -88,13 +98,7 @@ class AgendaManager extends AbstractManager<AgendaDocument> {
             as: "user",
           },
         },
-        // Déplier le tableau pour avoir directement l'objet
-        {
-          $unwind: {
-            path: "$user",
-            preserveNullAndEmptyArrays: true, // optionnel si certains agendas n'ont pas d'utilisateur
-          },
-        },
+        { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
       ])
       .exec();
 
@@ -108,6 +112,16 @@ class AgendaManager extends AbstractManager<AgendaDocument> {
     startOfWeek.setHours(0, 0, 0, 0);
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 7);
+
+    if (!this.userId) {
+      return {
+        mainCalendars: 0,
+        appointmentsThisWeek: 0,
+        waitingValidation: 0,
+        activeCollaborators: 0,
+      };
+    }
+    const calendar = await this.findByUser(this.userId);
 
     const stats = await this.model
       .aggregate([
@@ -142,16 +156,28 @@ class AgendaManager extends AbstractManager<AgendaDocument> {
                   },
                   waitingValidation: {
                     $sum: {
-                      $cond: [
-                        {
-                          $eq: [
-                            "$status",
-                            AppointmentStatusType.Pending.toString(),
-                          ],
+                      $size: {
+                        $filter: {
+                          input: "$agendas",
+                          as: "agendaItem",
+                          cond: {
+                            $and: [
+                              {
+                                $eq: [
+                                  "$$agendaItem.agenda",
+                                  new Types.ObjectId(calendar!.id as string),
+                                ],
+                              },
+                              {
+                                $eq: [
+                                  "$$agendaItem.status",
+                                  AppointmentStatusType.Pending.toString(),
+                                ],
+                              },
+                            ],
+                          },
                         },
-                        1,
-                        0,
-                      ],
+                      },
                     },
                   },
                   activeCollaboratorsSet: {

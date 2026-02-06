@@ -8,7 +8,7 @@ import {
 export default class AbstractManager<T extends Document = Document> {
   protected model: Model<T>;
 
-  private readonly userId?: Types.ObjectId;
+  protected readonly userId?: Types.ObjectId;
 
   constructor(model: Model<T>, userId?: Types.ObjectId) {
     this.model = model;
