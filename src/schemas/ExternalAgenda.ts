@@ -1,4 +1,4 @@
-import { model as Model } from "mongoose";
+import { model as Model, Types } from "mongoose";
 import { SchemaExtended } from "@models/SchemaExtended.js";
 import { ExternalAgendaDocument } from "@/types/ExternalAgendaDocument";
 
@@ -20,6 +20,10 @@ const schema = new SchemaExtended<ExternalAgendaDocument>(
     agenda: {
       type: SchemaExtended.Types.ObjectId,
       ref: "Agenda",
+    },
+    createdBy: {
+      type: Types.ObjectId,
+      ref: "User",
     },
   },
   {

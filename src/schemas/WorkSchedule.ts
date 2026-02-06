@@ -1,4 +1,4 @@
-import { model as Model } from "mongoose";
+import { model as Model, Types } from "mongoose";
 import { SchemaExtended } from "@/models/SchemaExtended.js";
 import { WorkScheduleDocument } from "@/types/WorkScheduleDocument";
 
@@ -19,6 +19,10 @@ const schema = new SchemaExtended<WorkScheduleDocument>(
     },
     user: {
       type: SchemaExtended.Types.ObjectId,
+      ref: "User",
+    },
+    createdBy: {
+      type: Types.ObjectId,
       ref: "User",
     },
   },

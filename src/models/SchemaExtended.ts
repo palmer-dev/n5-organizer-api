@@ -3,6 +3,7 @@ import {
   type SchemaDefinition,
   type SchemaOptions,
   type Document,
+  type Types,
 } from "mongoose";
 
 export class SchemaExtended<T extends Document = Document> extends Schema<T> {

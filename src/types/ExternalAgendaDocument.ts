@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import { TimestampedDocument } from "@/types/TimestampedDocument";
+import { OwnedDocument } from "@/types/OwnedDocument";
 
 export interface IExternalAgenda {
   url: string;
@@ -9,5 +10,5 @@ export interface IExternalAgenda {
 }
 
 export interface ExternalAgendaDocument
-  extends TimestampedDocument,
+  extends OwnedDocument,
     IExternalAgenda {}

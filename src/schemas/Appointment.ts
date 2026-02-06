@@ -14,7 +14,6 @@ const schema = new SchemaExtended<AppointmentDocument>(
     },
     notes: {
       type: String,
-      required: true,
     },
     startDate: {
       type: Date,
@@ -24,32 +23,49 @@ const schema = new SchemaExtended<AppointmentDocument>(
       type: Date,
       required: true,
     },
-    status: {
-      type: String,
-      enum: AppointmentStatusType.keys(),
-      default: AppointmentStatusType.Pending,
-    },
     agendas: [
       {
-        type: SchemaExtended.Types.ObjectId,
-        ref: "Agenda",
+        agenda: {
+          type: SchemaExtended.Types.ObjectId,
+          ref: "Agenda",
+          required: true,
+        },
+        status: {
+          type: String,
+          enum: AppointmentStatusType.values(),
+          default: AppointmentStatusType.Pending.toString(),
+        },
       },
     ],
+    createdBy: {
+      type: Types.ObjectId,
+      ref: "User",
+    },
   },
   {
     timestamps: true,
   }
 );
 
-// eslint-disable-next-line func-names
 schema.virtual("users").get(function () {
   if (!this.agendas) return [];
 
-  return (this.agendas as AgendaPopulated[])
+  return (this.agendas as unknown as AgendaPopulated[])
     .map((agenda) => {
-      if (typeof agenda === "object" && "user" in agenda) {
-        return agenda.user;
+      if (agenda instanceof Types.ObjectId) {
+        return undefined;
       }
+
+      if (
+        typeof agenda === "object" &&
+        "agenda" in agenda &&
+        agenda.agenda &&
+        typeof agenda.agenda === "object" &&
+        "user" in agenda.agenda
+      ) {
+        return agenda.agenda.user;
+      }
+
       return undefined;
     })
     .filter((u): u is Types.ObjectId => Boolean(u));
@@ -57,7 +73,7 @@ schema.virtual("users").get(function () {
 
 // eslint-disable-next-line func-names
 schema.pre("find", function () {
-  this.populate({ path: "agendas", select: "user" });
+  this.populate("agendas.agenda agendas");
 });
 
 const model = Model<AppointmentDocument>("Appointment", schema);

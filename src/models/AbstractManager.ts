@@ -1,4 +1,9 @@
-import { type Model, type Document, type Types } from "mongoose";
+import {
+  type Model,
+  type Document,
+  type Types,
+  RootFilterQuery,
+} from "mongoose";
 
 export default class AbstractManager<T extends Document = Document> {
   protected model: Model<T>;
@@ -10,7 +15,7 @@ export default class AbstractManager<T extends Document = Document> {
     this.userId = userId;
   }
 
-  private userFilter() {
+  protected userFilter() {
     return this.userContextProperty("user");
   }
 
@@ -35,7 +40,7 @@ export default class AbstractManager<T extends Document = Document> {
     return this.model
       .findOneAndDelete({
         _id: id,
-        ...this.userFilter(),
+        // ...this.userFilter(),
       })
       .exec();
   }
@@ -45,15 +50,26 @@ export default class AbstractManager<T extends Document = Document> {
       throw new Error("User context required");
     }
 
+    console.log({
+      ...data,
+      ...this.userContextProperty("createdBy"),
+    });
+
     // Model.create renvoie l'instance créée (et une Promise)
     return this.model.create({
       ...data,
-      ...this.userContextProperty("created_by"),
+      ...this.userContextProperty("createdBy"),
     } as unknown as T);
   }
 
   update(data: Partial<T> & Pick<T, "id">): Promise<T | null> {
     // { new: true } pour retourner le document mis à jour
     return this.model.findByIdAndUpdate(data.id, data, { new: true }).exec();
+  }
+
+  findWithoutExec(search: RootFilterQuery<T> = {}) {
+    return this.model.find({
+      ...search,
+    });
   }
 }

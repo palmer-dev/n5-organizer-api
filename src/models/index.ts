@@ -52,7 +52,6 @@ function forUser(userId: Types.ObjectId) {
     agenda: new AgendaManager(userId),
     workSchedule: new WorkScheduleManager(userId),
     externalAgenda: new ExternalAgendManager(userId),
-    // volontairement PAS user
   };
 
   return new Proxy(userModels, handler);

@@ -18,6 +18,10 @@ class AppointmentStatusType {
   static keys() {
     return Object.keys(this);
   }
+
+  static values(): string[] {
+    return Object.values(this).map((value) => value.toString());
+  }
 }
 
 export default AppointmentStatusType;

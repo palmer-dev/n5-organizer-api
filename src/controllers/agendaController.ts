@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import models from "@models/index";
 import { AgendaDocument } from "@/types/AgendaDocument";
 import { Types } from "mongoose";
+import { getAppointmentStatusByUser } from "@lib/appointmentStatus";
 
 const browse = async (req: Request, res: Response) => {
   models
@@ -37,11 +38,16 @@ const getAppointments = async (req: Request, res: Response) => {
   models
     .forUser(new Types.ObjectId(req.user.id))
     .agenda.appointments(req.params.id)
-    .then((row) => {
-      if (row == null) {
+    .then((rows) => {
+      if (rows == null) {
         res.sendStatus(404);
       } else {
-        res.send(row);
+        res.send(
+          rows.map((row) => ({
+            ...row.toJSON(),
+            status: getAppointmentStatusByUser(row, req.user.id).toString(),
+          }))
+        );
       }
     })
     .catch((err) => {

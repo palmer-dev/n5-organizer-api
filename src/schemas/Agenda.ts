@@ -1,4 +1,4 @@
-import { model as Model } from "mongoose";
+import { model as Model, Types } from "mongoose";
 import { SchemaExtended } from "@models/SchemaExtended";
 import AgendaType from "@/types/AgendaType";
 import { AgendaDocument } from "@/types/AgendaDocument";
@@ -16,7 +16,15 @@ const schema = new SchemaExtended<AgendaDocument>(
       default: AgendaType.Intern,
     },
     user: {
-      type: SchemaExtended.Types.ObjectId,
+      type: Types.ObjectId,
+      ref: "User",
+    },
+    main: {
+      type: Boolean,
+      default: false,
+    },
+    createdBy: {
+      type: Types.ObjectId,
       ref: "User",
     },
   },
@@ -24,6 +32,11 @@ const schema = new SchemaExtended<AgendaDocument>(
     timestamps: true,
   }
 );
+
+// eslint-disable-next-line func-names
+schema.pre("find", function () {
+  this.populate({ path: "user", select: "-password" });
+});
 
 const model = Model<AgendaDocument>("Agenda", schema);
 

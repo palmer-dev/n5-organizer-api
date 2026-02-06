@@ -1,9 +1,11 @@
 import type { Request, Response } from "express";
+import { Types } from "mongoose";
 import models from "../models/index.js";
 
 const browse = async (req: Request, res: Response) => {
-  models.workSchedule
-    .findAll()
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .workSchedule.findAll()
     .then((rows) => {
       res.send(rows);
     })
@@ -14,8 +16,9 @@ const browse = async (req: Request, res: Response) => {
 };
 
 const read = async (req: Request, res: Response) => {
-  models.workSchedule
-    .find(req.params.id)
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .workSchedule.find(req.params.id)
     .then((row) => {
       if (row == null) {
         res.sendStatus(404);
@@ -36,8 +39,9 @@ const edit = async (req: Request, res: Response) => {
 
   workSchedule.id = parseInt(req.params.id, 10);
 
-  models.workSchedule
-    .update(workSchedule)
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .workSchedule.update(workSchedule)
     .then((result) => {
       if (result === null) {
         res.sendStatus(404);
@@ -56,8 +60,9 @@ const add = async (req: Request, res: Response) => {
 
   // TODO validations (length, format...)
 
-  models.workSchedule
-    .create(workSchedule)
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .workSchedule.create(workSchedule)
     .then((result) => {
       res.location(`/workSchedules/${result.id}`).sendStatus(201);
     })
@@ -68,8 +73,9 @@ const add = async (req: Request, res: Response) => {
 };
 
 const destroy = async (req: Request, res: Response) => {
-  models.workSchedule
-    .delete(req.params.id)
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .workSchedule.delete(req.params.id)
     .then((result) => {
       if (result === null) {
         res.sendStatus(404);

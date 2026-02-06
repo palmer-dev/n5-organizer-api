@@ -1,14 +1,25 @@
 import { matchedData } from "express-validator";
 import type { Request, Response } from "express";
 import { AppointmentAvailabilitySearch } from "@/types/AppointmentDocument";
-import models from "../models/index.js";
 import { SlotsFinder } from "@/services/slotsFinder";
+import { Types } from "mongoose";
+import AppointmentStatusType from "@/types/AppointmentStatusType";
+import { AppointmentCreateBody } from "@/types/Appointment/CreateBody";
+import { UpdateStatusBody } from "@/types/Appointment/UpdateStatusBody";
+import { getAppointmentStatusByUser } from "@lib/appointmentStatus";
+import models from "@/models";
 
 const browse = async (req: Request, res: Response) => {
-  models.appointment
-    .findAll()
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .appointment.findAll()
     .then((rows) => {
-      res.send(rows);
+      res.send(
+        rows.map((row) => ({
+          ...row,
+          status: getAppointmentStatusByUser(row, req.user.id),
+        }))
+      );
     })
     .catch((err) => {
       console.error(err);
@@ -17,8 +28,9 @@ const browse = async (req: Request, res: Response) => {
 };
 
 const read = async (req: Request, res: Response) => {
-  models.appointment
-    .find(req.params.id)
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .appointment.find(req.params.id)
     .then((row) => {
       if (row == null) {
         res.sendStatus(404);
@@ -37,10 +49,11 @@ const edit = async (req: Request, res: Response) => {
 
   // TODO validations (length, format...)
 
-  appointment.id = parseInt(req.params.id, 10);
+  appointment.id = new Types.ObjectId(req.params.id);
 
-  models.appointment
-    .update(appointment)
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .appointment.update(appointment)
     .then((result) => {
       if (result === null) {
         res.sendStatus(404);
@@ -54,15 +67,35 @@ const edit = async (req: Request, res: Response) => {
     });
 };
 
-const add = async (req: Request, res: Response) => {
+const add = async (
+  req: Request<object, object, AppointmentCreateBody>,
+  res: Response
+) => {
   const appointment = req.body;
 
   // TODO validations (length, format...)
 
-  models.appointment
-    .create(appointment)
+  const { name, notes, startDate, endDate, users } = appointment;
+
+  const agendas = await models.agenda.findForUsers([
+    new Types.ObjectId(req.user.id),
+    ...users,
+  ]);
+
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .appointment.create({
+      name,
+      notes,
+      startDate,
+      endDate,
+      agendas: agendas.map((agenda) => ({
+        agenda: agenda.id as Types.ObjectId,
+        status: AppointmentStatusType.Pending,
+      })),
+    })
     .then((result) => {
-      res.location(`/appointments/${result.id}`).sendStatus(201);
+      res.status(201).json(result);
     })
     .catch((err) => {
       console.error(err);
@@ -97,13 +130,36 @@ const search = async (req: Request, res: Response) => {
 };
 
 const destroy = async (req: Request, res: Response) => {
-  models.appointment
-    .delete(req.params.id)
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .appointment.delete(req.params.id)
     .then((result) => {
       if (result === null) {
         res.sendStatus(404);
       } else {
-        res.sendStatus(204);
+        res.status(200).json(result);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.sendStatus(500);
+    });
+};
+
+const updateStatus = async (
+  req: Request<{ id: string }, object, UpdateStatusBody>,
+  res: Response
+) => {
+  const { status, agendaId } = req.body;
+
+  models
+    .forUser(new Types.ObjectId(req.user.id))
+    .appointment.updateAgendaStatus(req.params.id, agendaId, status)
+    .then((result) => {
+      if (result === null) {
+        res.sendStatus(404);
+      } else {
+        res.status(200).json(result);
       }
     })
     .catch((err) => {
@@ -119,4 +175,5 @@ export default {
   add,
   destroy,
   search,
+  updateStatus,
 };

@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { TimestampedDocument } from "@/types/TimestampedDocument";
+import { OwnedDocument } from "@/types/OwnedDocument";
 
 export interface IWorkSchedule {
   timezone: string;
@@ -8,6 +8,4 @@ export interface IWorkSchedule {
   user?: Types.ObjectId;
 }
 
-export interface WorkScheduleDocument
-  extends TimestampedDocument,
-    IWorkSchedule {}
+export interface WorkScheduleDocument extends OwnedDocument, IWorkSchedule {}

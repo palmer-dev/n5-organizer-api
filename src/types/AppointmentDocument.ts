@@ -1,18 +1,21 @@
 import { Types } from "mongoose";
 import AppointmentStatusType from "@/types/AppointmentStatusType";
-import { TimestampedDocument } from "@/types/TimestampedDocument";
+import { OwnedDocument } from "@/types/OwnedDocument";
+import { AgendaDocument } from "@/types/AgendaDocument";
 
 export interface IAppointmentDocument {
   name: string;
   notes: string;
   startDate: Date;
   endDate: Date;
-  status?: AppointmentStatusType;
-  agendas: Types.ObjectId[];
+  agendas: {
+    agenda: Types.ObjectId | AgendaDocument;
+    status: AppointmentStatusType;
+  }[];
 }
 
 export interface AppointmentDocument
-  extends TimestampedDocument,
+  extends OwnedDocument,
     IAppointmentDocument {}
 
 export type AppointmentAvailabilitySearch = {

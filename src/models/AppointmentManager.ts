@@ -5,6 +5,7 @@ import {
   AppointmentDocument,
 } from "@/types/AppointmentDocument";
 import { PipelineStage, Types } from "mongoose";
+import AppointmentStatusType from "@/types/AppointmentStatusType";
 
 class AppointmentManager extends AbstractManager<AppointmentDocument> {
   constructor(userId?: Types.ObjectId) {
@@ -33,9 +34,26 @@ class AppointmentManager extends AbstractManager<AppointmentDocument> {
         $match: matchStage,
       },
       {
+        $addFields: {
+          agendaIds: {
+            $map: {
+              input: "$agendas",
+              as: "a",
+              in: {
+                $cond: [
+                  { $eq: [{ $type: "$$a" }, "objectId"] },
+                  "$$a", // ancien format
+                  "$$a.agenda", // nouveau format
+                ],
+              },
+            },
+          },
+        },
+      },
+      {
         $lookup: {
           from: "agendas",
-          localField: "agendas",
+          localField: "agendaIds",
           foreignField: "_id",
           as: "agendas",
         },
@@ -51,9 +69,35 @@ class AppointmentManager extends AbstractManager<AppointmentDocument> {
           },
         },
       },
+      {
+        $project: {
+          agendaIds: 0,
+        },
+      },
     ];
-
     return this.model.aggregate(searchAggregation).exec();
+  }
+
+  updateAgendaStatus(
+    appointmentId: string,
+    agendaId: string,
+    status: AppointmentStatusType
+  ): Promise<AppointmentDocument | null> {
+    console.log(appointmentId, agendaId, status);
+    return this.model
+      .findByIdAndUpdate(
+        appointmentId,
+        {
+          $set: {
+            "agendas.$[a].status": status,
+          },
+        },
+        {
+          new: true,
+          arrayFilters: [{ "a.agenda": agendaId }],
+        }
+      )
+      .exec();
   }
 }
 
