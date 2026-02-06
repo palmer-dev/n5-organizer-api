@@ -50,11 +50,6 @@ export default class AbstractManager<T extends Document = Document> {
       throw new Error("User context required");
     }
 
-    console.log({
-      ...data,
-      ...this.userContextProperty("createdBy"),
-    });
-
     // Model.create renvoie l'instance créée (et une Promise)
     return this.model.create({
       ...data,

@@ -28,7 +28,6 @@ const upcoming = async (req: Request, res: Response) => {
     .limit(5)
     .exec()
     .then((result) => {
-      console.log(result);
       if (result === null) {
         res.sendStatus(404);
       } else {

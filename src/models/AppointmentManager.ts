@@ -83,7 +83,6 @@ class AppointmentManager extends AbstractManager<AppointmentDocument> {
     agendaId: string,
     status: AppointmentStatusType
   ): Promise<AppointmentDocument | null> {
-    console.log(appointmentId, agendaId, status);
     return this.model
       .findByIdAndUpdate(
         appointmentId,
