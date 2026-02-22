@@ -1,6 +1,6 @@
-import { TimestampedDocument } from "@/types/TimestampedDocument";
-import { Types } from "mongoose";
+import {TimestampedDocument} from "@/types/TimestampedDocument";
+import {Schema} from "mongoose";
 
 export interface OwnedDocument extends TimestampedDocument {
-  createdBy?: Types.ObjectId;
+    createdBy?: Schema.Types.ObjectId;
 }

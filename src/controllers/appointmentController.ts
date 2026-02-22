@@ -9,7 +9,7 @@ import { UpdateStatusBody } from "@/types/Appointment/UpdateStatusBody";
 import { getAppointmentStatusByUser } from "@lib/appointmentStatus";
 import models from "@/models";
 
-const browse = async (req: Request, res: Response) => {
+const browse = async (req: Request<{ id: string }>, res: Response) => {
   models
     .forUser(new Types.ObjectId(req.user.id))
     .appointment.findAll()
@@ -27,7 +27,7 @@ const browse = async (req: Request, res: Response) => {
     });
 };
 
-const read = async (req: Request, res: Response) => {
+const read = async (req: Request<{ id: string }>, res: Response) => {
   models
     .forUser(new Types.ObjectId(req.user.id))
     .appointment.find(req.params.id)
@@ -44,7 +44,7 @@ const read = async (req: Request, res: Response) => {
     });
 };
 
-const edit = async (req: Request, res: Response) => {
+const edit = async (req: Request<{ id: string }>, res: Response) => {
   const appointment = req.body;
 
   // TODO validations (length, format...)
@@ -129,7 +129,7 @@ const search = async (req: Request, res: Response) => {
   }
 };
 
-const destroy = async (req: Request, res: Response) => {
+const destroy = async (req: Request<{ id: string }>, res: Response) => {
   models
     .forUser(new Types.ObjectId(req.user.id))
     .appointment.delete(req.params.id)

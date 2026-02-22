@@ -15,7 +15,7 @@ const browse = async (req: Request, res: Response) => {
     });
 };
 
-const read = async (req: Request, res: Response) => {
+const read = async (req: Request<{ id: string }>, res: Response) => {
   models
     .forUser(new Types.ObjectId(req.user.id))
     .externalAgenda.find(req.params.id)
@@ -32,7 +32,7 @@ const read = async (req: Request, res: Response) => {
     });
 };
 
-const edit = async (req: Request, res: Response) => {
+const edit = async (req: Request<{ id: string }>, res: Response) => {
   const externalAgenda = req.body;
 
   // TODO validations (length, format...)
@@ -72,7 +72,7 @@ const add = async (req: Request, res: Response) => {
     });
 };
 
-const destroy = async (req: Request, res: Response) => {
+const destroy = async (req: Request<{ id: string }>, res: Response) => {
   models
     .forUser(new Types.ObjectId(req.user.id))
     .externalAgenda.delete(req.params.id)

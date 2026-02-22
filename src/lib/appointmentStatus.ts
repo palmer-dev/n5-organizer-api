@@ -1,37 +1,43 @@
 import AppointmentStatusType from "@/types/AppointmentStatusType";
-import { AppointmentDocument } from "@/types/AppointmentDocument";
-import { Types } from "mongoose";
-import { UserDocument } from "@/types/UserDocument";
+import {AppointmentDocument} from "@/types/AppointmentDocument";
+import {Types} from "mongoose";
+import {UserDocument} from "@/types/UserDocument";
+import {isPopulated} from "@lib/isPopulated";
 
 export function getAppointmentStatus(
-  appointment: AppointmentDocument,
-  agendaId: Types.ObjectId
+    appointment: AppointmentDocument,
+    agendaId: Types.ObjectId
 ) {
-  const userAgenda = appointment.agendas.find(
-    (agenda) => agenda.agenda === agendaId
-  );
+    const userAgenda = appointment.agendas.find(
+        (agenda) => agenda.agenda === agendaId
+    );
 
-  if (userAgenda) {
-    return userAgenda.status;
-  }
+    if (userAgenda) {
+        return userAgenda.status;
+    }
 
-  return AppointmentStatusType.Pending;
+    return AppointmentStatusType.Pending;
 }
 
 export function getAppointmentStatusByUser(
-  appointment: AppointmentDocument,
-  user: string
+    appointment: AppointmentDocument,
+    user: string
 ) {
-  const userAgenda = appointment.agendas.find((agenda) => {
-    if (agenda.agenda instanceof Types.ObjectId) return false;
+    const userAgenda = appointment.agendas.find((agenda) => {
+        if (agenda.agenda instanceof Types.ObjectId) return false;
 
-    // eslint-disable-next-line no-underscore-dangle
-    return agenda.agenda.user?._id.toString() === user;
-  });
+        const agendaUser = agenda.agenda.user;
 
-  if (userAgenda) {
-    return userAgenda.status;
-  }
+        if (isPopulated<UserDocument>(agendaUser)) {
+            return agendaUser.id.toString() === user;
+        } else {
+            return agendaUser.toString() === user;
+        }
+    });
 
-  return AppointmentStatusType.Pending;
+    if (userAgenda) {
+        return userAgenda.status;
+    }
+
+    return AppointmentStatusType.Pending;
 }

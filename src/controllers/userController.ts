@@ -13,7 +13,7 @@ const browse = async (req: Request, res: Response) => {
     });
 };
 
-const read = async (req: Request, res: Response) => {
+const read = async (req: Request<{ id: string }>, res: Response) => {
   models.user
     .find(req.params.id)
     .then((row) => {
@@ -29,7 +29,7 @@ const read = async (req: Request, res: Response) => {
     });
 };
 
-const edit = async (req: Request, res: Response) => {
+const edit = async (req: Request<{ id: string }>, res: Response) => {
   const user = req.body;
 
   // TODO validations (length, format...)
@@ -67,7 +67,7 @@ const add = async (req: Request, res: Response) => {
     });
 };
 
-const destroy = async (req: Request, res: Response) => {
+const destroy = async (req: Request<{ id: string }>, res: Response) => {
   models.user
     .delete(req.params.id)
     .then((result) => {
