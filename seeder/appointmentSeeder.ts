@@ -1,10 +1,10 @@
 import {faker} from "@faker-js/faker";
-import {IAppointmentDocument} from "@/types/AppointmentDocument";
+import {IAppointmentDocument} from "../src/types/AppointmentDocument";
 import AppointmentManager from "../src/models/AppointmentManager";
 import AgendaManager from "../src/models/AgendaManager";
 import AppointmentStatusType from "../src/types/AppointmentStatusType";
 import {Types} from "mongoose";
-import {AgendaDocument} from "@/types/AgendaDocument";
+import {AgendaDocument} from "../src/types/AgendaDocument";
 
 async function seed() {
     const DATA: IAppointmentDocument[] = [];
