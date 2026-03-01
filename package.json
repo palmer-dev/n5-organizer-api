@@ -1,6 +1,7 @@
 {
   "scripts": {
     "dev": "tsx --watch src/index.ts",
+    "seed": "cross-env NODE_ENV=seed sh -c \"tsc -p seeder/tsconfig.json && tsc-alias -p seeder/tsconfig.json && node dist/seeder/seed.js\"",
     "start": "node dist/index.js",
     "migrate": "tsx migrate.ts",
     "build": "tsc && tsc-alias",
@@ -32,6 +33,7 @@
     "@types/node": "^24.10.1",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",
+    "cross-env": "^10.1.0",
     "eslint": "^8.57.1",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.6.0",

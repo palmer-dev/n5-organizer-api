@@ -1,48 +1,66 @@
 import {faker} from "@faker-js/faker";
-import {IAppointmentDocument} from "../src/types/AppointmentDocument";
-import AppointmentManager from "../src/models/AppointmentManager";
-import AgendaManager from "../src/models/AgendaManager";
-import AppointmentStatusType from "../src/types/AppointmentStatusType";
+import AppointmentManager from "@/models/AppointmentManager";
+import AppointmentStatusType from "@/types/AppointmentStatusType";
+import {AgendaDocument} from "@/types/AgendaDocument";
+import Agenda from "@schemas/Agenda";
 import {Types} from "mongoose";
-import {AgendaDocument} from "../src/types/AgendaDocument";
+import {UserDocument} from "@/types/UserDocument";
 
-async function seed() {
-    const DATA: IAppointmentDocument[] = [];
 
-    const agendaManager = new AgendaManager();
-    const agendas = await agendaManager.findAll();
+async function getRandomAgendas(nb: number, ignoreId: string | Types.ObjectId) {
+    return Agenda.aggregate([
+        {
+            $match: {user: {$ne: new Types.ObjectId(ignoreId)}}
+        },
+        {$sample: {size: nb}}
+    ]);
+}
 
-    const manager: AppointmentManager = new AppointmentManager();
-    const nbEntity = Math.random() * 100 + 2;
+function randomStartDateWithinWorkHours(daysAhead = 30) {
+    // Choisit un jour dans les X prochains jours
+    const date = faker.date.soon({ days: daysAhead });
 
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < nbEntity; i++) {
-        const startDate = faker.date.soon({days: 30}); // dans les 30 prochains jours
-        const durationMinutes = faker.number.int({min: 30, max: 180}); // 30 min à 3h
+    // Définir heure aléatoire entre 8h et 17h30
+    const hour = faker.number.int({ min: 8, max: 17 });
+    const minute = hour === 17 ? faker.helpers.arrayElement([0, 15, 30]) : faker.number.int({ min: 0, max: 59 });
+
+    date.setHours(hour, minute, 0, 0);
+    return date;
+}
+
+async function seed(user: UserDocument, agenda: AgendaDocument) {
+    const nbAgendasToLink = faker.number.int({min: 1, max: 2});
+
+    // récupère des agendas aléatoires en excluant l'agenda actuel
+    const otherAgendas = await getRandomAgendas(nbAgendasToLink, user.id);
+
+    const agendasToLink = otherAgendas.map(a => ({
+        agenda: a._id,
+        status: faker.helpers.arrayElement(AppointmentStatusType.cases())
+    }));
+
+    agendasToLink.push({agenda: agenda._id, status: faker.helpers.arrayElement(AppointmentStatusType.cases())});
+
+    const appointmentManager = new AppointmentManager(user.id);
+
+    const nbEntity = faker.number.int({min: 1, max: 3});
+
+    const createPromises = Array.from({length: nbEntity}).map(async () => {
+        const possibleDurations = [60, 90, 120, 150]; // 1h, 1h30, 2h, 2h30
+        const startDate = randomStartDateWithinWorkHours();
+        const durationMinutes = faker.helpers.arrayElement(possibleDurations);
         const endDate = new Date(startDate.getTime() + durationMinutes * 60 * 1000);
 
-        const toLink: {
-            agenda: Types.ObjectId | AgendaDocument;
-            status: AppointmentStatusType;
-        }[] = [];
-        // eslint-disable-next-line no-shadow,no-plusplus
-        for (let i = 0; i < Math.random() * 2 + 1; i++) {
-            const numberOfEntity = agendas.length;
-            const index = faker.number.int({min: 0, max: numberOfEntity - 1});
-            toLink.push({agenda: agendas[index].id, status: AppointmentStatusType.Pending});
-        }
-
-        DATA.push({
-            name: faker.word.words(1),
+        return appointmentManager.create({
+            name: faker.word.words({count: 2}),
             notes: faker.lorem.lines(2),
             startDate,
             endDate,
-            agendas: toLink,
+            agendas: agendasToLink,
         });
-    }
+    });
 
-    const createPromises = DATA.map((data) => manager.create(data));
-    return Promise.all(createPromises);
+    return await Promise.all(createPromises);
 }
 
 async function clear() {

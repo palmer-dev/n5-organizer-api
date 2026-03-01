@@ -3,27 +3,23 @@ import {IAgenda} from "@/types/AgendaDocument";
 import AgendaManager from "@/models/AgendaManager";
 import UserManager from "@/models/UserManager";
 import AgendaType from "@/types/AgendaType";
-import user from "@schemas/User";
+import {UserDocument} from "@/types/UserDocument";
 
-async function seed() {
+async function seed(user: UserDocument) {
     const DATA: IAgenda[] = [];
 
-    const userManager = new UserManager();
-    const users = await userManager.findAll();
 
-    const manager = new AgendaManager();
-    const nbEntity = Math.random() * 10 + 2;
+    const manager = new AgendaManager(user.id);
+    const nbEntity = faker.number.int({min: 1, max: 1});
 
     // eslint-disable-next-line no-plusplus
     for (let i = 0; i < nbEntity; i++) {
-        const user = users[faker.number.int({min: 0, max: users.length - 1})];
-        if (user)
-            DATA.push({
-                main: DATA.length === 0,
-                name: faker.word.adverb(),
-                type: AgendaType.Intern,
-                user: user.id
-            });
+        DATA.push({
+            main: DATA.length === 0,
+            name: `${faker.word.adjective()} ${faker.word.noun()}`,
+            type: AgendaType.Intern,
+            user: user.id
+        });
     }
 
     const createPromises = DATA.map((data) => manager.create(data));

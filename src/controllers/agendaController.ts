@@ -37,7 +37,8 @@ const read = async (req: Request<{ id: string }>, res: Response) => {
 const getAppointments = async (req: Request<{ id: string }>, res: Response) => {
     models
         .forUser(new Types.ObjectId(req.user.id))
-        .agenda.appointments(req.params.id)
+        .agenda
+        .appointments(req.params.id)
         .then((rows) => {
             if (rows == null) {
                 res.sendStatus(404);

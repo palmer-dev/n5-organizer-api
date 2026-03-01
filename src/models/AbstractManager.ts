@@ -23,6 +23,10 @@ export default class AbstractManager<T extends Document = Document> {
     return this.userId ? { [property]: this.userId } : {};
   }
 
+  useModel() {
+    return this.model;
+  }
+
   find(id: string | Types.ObjectId): Promise<T | null> {
     return this.model
       .findOne({

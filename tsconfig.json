@@ -4,30 +4,50 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "lib": ["ES2022"],
-
+    "lib": [
+      "ES2022"
+    ],
     /* Sortie et Entrée */
     "rootDir": "./src",
     "outDir": "./dist",
     "baseUrl": ".",
-
     /* Interopérabilité et Typage */
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": true, // Fortement recommandé pour éviter les bugs Mongoose/TS
+    "strict": true,
+    // Fortement recommandé pour éviter les bugs Mongoose/TS
     "skipLibCheck": true,
-
     /* Alias de chemins (Vérifie que tsc-alias est bien configuré) */
     "paths": {
-      "@/*": ["src/*"],
-      "@models/*": ["src/models/*"],
-      "@routers/*": ["src/routers/*"],
-      "@schemas/*": ["src/schemas/*"],
-      "@middlewares/*": ["src/middlewares/*"],
-      "@lib/*": ["src/lib/*"],
-      "@controllers/*": ["src/controllers/*"]
+      "@/*": [
+        "src/*"
+      ],
+      "@models/*": [
+        "src/models/*"
+      ],
+      "@routers/*": [
+        "src/routers/*"
+      ],
+      "@schemas/*": [
+        "src/schemas/*"
+      ],
+      "@middlewares/*": [
+        "src/middlewares/*"
+      ],
+      "@lib/*": [
+        "src/lib/*"
+      ],
+      "@controllers/*": [
+        "src/controllers/*"
+      ]
     }
   },
-  "include": ["src/**/*", "types/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*",
+    "types/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

@@ -1,7 +1,7 @@
 import { TimestampedDocument } from "@/types/TimestampedDocument";
 
 export interface IUser {
-  name?: string;
+  name: string;
   firstname: string;
   lastname: string;
   email: string;

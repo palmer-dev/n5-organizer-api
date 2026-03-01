@@ -3,6 +3,11 @@ import AppointmentStatusType from "@/types/AppointmentStatusType";
 import { OwnedDocument } from "@/types/OwnedDocument";
 import { AgendaDocument } from "@/types/AgendaDocument";
 
+export interface IAppointmentAgendas {
+    agenda: Types.ObjectId | AgendaDocument;
+    status: AppointmentStatusType;
+}
+
 export interface IAppointmentDocument {
   name: string;
   notes: string;

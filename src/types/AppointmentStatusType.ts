@@ -1,27 +1,31 @@
 class AppointmentStatusType {
-  private readonly name: string;
+    private readonly name: string;
 
-  static Validated = new AppointmentStatusType("Validated");
+    static Validated = new AppointmentStatusType("Validated");
 
-  static Refused = new AppointmentStatusType("Refused");
+    static Refused = new AppointmentStatusType("Refused");
 
-  static Pending = new AppointmentStatusType("Pending");
+    static Pending = new AppointmentStatusType("Pending");
 
-  constructor(name: string) {
-    this.name = name;
-  }
+    constructor(name: string) {
+        this.name = name;
+    }
 
-  toString() {
-    return this.name;
-  }
+    toString() {
+        return this.name;
+    }
 
-  static keys() {
-    return Object.keys(this);
-  }
+    static keys() {
+        return Object.keys(this);
+    }
 
-  static values(): string[] {
-    return Object.values(this).map((value) => value.toString());
-  }
+    static values(): string[] {
+        return Object.values(this).map((value) => value.toString());
+    }
+
+    static cases(): AppointmentStatusType[] {
+        return Object.values(this);
+    }
 }
 
 export default AppointmentStatusType;
