@@ -18,11 +18,11 @@ async function getRandomAgendas(nb: number, ignoreId: string | Types.ObjectId) {
 
 function randomStartDateWithinWorkHours(daysAhead = 30) {
     // Choisit un jour dans les X prochains jours
-    const date = faker.date.soon({ days: daysAhead });
+    const date = faker.date.soon({days: daysAhead});
 
     // Définir heure aléatoire entre 8h et 17h30
-    const hour = faker.number.int({ min: 8, max: 17 });
-    const minute = hour === 17 ? faker.helpers.arrayElement([0, 15, 30]) : faker.number.int({ min: 0, max: 59 });
+    const hour = faker.number.int({min: 8, max: 17});
+    const minute = faker.helpers.arrayElement([0, 15, 30, 45]);
 
     date.setHours(hour, minute, 0, 0);
     return date;
