@@ -20,30 +20,53 @@ const stats = async (req: Request, res: Response) => {
 };
 
 const upcoming = async (req: Request, res: Response) => {
-
     models
         .forUser(new Types.ObjectId(req.user.id))
         .appointment
         .useModel()
         .aggregate([
             {$match: {startDate: {$gte: new Date()}}},
+            {$unwind: "$agendas"},
             {
                 $lookup: {
                     from: "agendas",
                     localField: "agendas.agenda",
                     foreignField: "_id",
-                    as: "agendaDoc"
+                    as: "agendas.agenda"
                 }
             },
-            {$unwind: "$agendaDoc"}, // un agenda par document
-            {$match: {"agendaDoc.user": new Types.ObjectId(req.user.id)}},
+            {$unwind: "$agendas.agenda"},
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "agendas.agenda.user",
+                    foreignField: "_id",
+                    as: "agendas.agenda.user"
+                }
+            },
+            {$unwind: "$agendas.agenda.user"},
             {
                 $group: {
                     _id: "$_id",
-                    doc: {$first: "$$ROOT"} // regroupe par appointment
+                    fullDoc: {$first: "$$ROOT"},
+                    agendasEnrichis: {$push: "$agendas"}
                 }
             },
-            {$replaceRoot: {newRoot: "$doc"}},
+            {
+                $match: {
+                    "agendasEnrichis.agenda.user._id": new Types.ObjectId(req.user.id)
+                }
+            },
+            {
+                $replaceRoot: {
+                    newRoot: {
+                        $mergeObjects: [
+                            "$fullDoc",
+                            {agendas: "$agendasEnrichis"}
+                        ]
+                    }
+                }
+            },
             {$limit: 5}
         ])
         .exec()

@@ -37,8 +37,7 @@ const read = async (req: Request<{ id: string }>, res: Response) => {
 const getAppointments = async (req: Request<{ id: string }>, res: Response) => {
     models
         .forUser(new Types.ObjectId(req.user.id))
-        .agenda
-        .appointments(req.params.id)
+        .agenda.appointments(req.params.id)
         .then((rows) => {
             if (rows == null) {
                 res.sendStatus(404);
@@ -58,7 +57,7 @@ const getAppointments = async (req: Request<{ id: string }>, res: Response) => {
 };
 
 const edit = async (req: Request<{ id: string }>, res: Response) => {
-    const agenda = req.body as AgendaDocument;
+    const agenda = req.body as Partial<AgendaDocument>;
 
     // TODO validations (length, format...)
 
@@ -81,7 +80,7 @@ const edit = async (req: Request<{ id: string }>, res: Response) => {
 };
 
 const add = async (req: Request, res: Response) => {
-    const agenda = req.body;
+    const agenda = req.body as Partial<AgendaDocument>;
 
     // TODO validations (length, format...)
 
