@@ -15,7 +15,7 @@ async function seed(user: UserDocument) {
     // eslint-disable-next-line no-plusplus
     for (let i = 0; i < nbEntity; i++) {
         DATA.push({
-            main: DATA.length === 0,
+            main: false,
             name: `${faker.word.adjective()} ${faker.word.noun()}`,
             type: AgendaType.Intern,
             user: user.id

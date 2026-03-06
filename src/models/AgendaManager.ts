@@ -138,6 +138,14 @@ class AgendaManager extends AbstractManager<AgendaDocument> {
                         from: "appointments",
                         pipeline: [
                             {
+                                $lookup: {
+                                    from: "agendas",
+                                    localField: "agendas.agenda",
+                                    foreignField: "_id",
+                                    as: "agendaDocs"
+                                }
+                            },
+                            {
                                 $group: {
                                     _id: null,
                                     appointmentsThisWeek: {
@@ -147,6 +155,25 @@ class AgendaManager extends AbstractManager<AgendaDocument> {
                                                     $and: [
                                                         {$gte: ["$startDate", startOfWeek]},
                                                         {$lt: ["$startDate", endOfWeek]},
+                                                        {
+                                                            $gt: [
+                                                                {
+                                                                    $size: {
+                                                                        $filter: {
+                                                                            input: "$agendaDocs",
+                                                                            as: "agenda",
+                                                                            cond: {
+                                                                                $eq: [
+                                                                                    "$$agenda.user",
+                                                                                    this.userId
+                                                                                ]
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                },
+                                                                0
+                                                            ]
+                                                        }
                                                     ],
                                                 },
                                                 1,
