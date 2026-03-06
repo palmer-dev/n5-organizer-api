@@ -191,21 +191,44 @@ class AgendaManager extends AbstractManager<AgendaDocument> {
                                                         $and: [
                                                             {
                                                                 $eq: [
-                                                                    "$$agendaItem.agenda",
-                                                                    new Types.ObjectId(calendar!.id as string),
-                                                                ],
+                                                                    "$$agendaItem.status",
+                                                                    AppointmentStatusType.Pending.toString()
+                                                                ]
                                                             },
                                                             {
-                                                                $eq: [
-                                                                    "$$agendaItem.status",
-                                                                    AppointmentStatusType.Pending.toString(),
-                                                                ],
-                                                            },
-                                                        ],
-                                                    },
-                                                },
-                                            },
-                                        },
+                                                                $gt: [
+                                                                    {
+                                                                        $size: {
+                                                                            $filter: {
+                                                                                input: "$agendaDocs",
+                                                                                as: "agenda",
+                                                                                cond: {
+                                                                                    $and: [
+                                                                                        {
+                                                                                            $eq: [
+                                                                                                "$$agenda._id",
+                                                                                                "$$agendaItem.agenda"
+                                                                                            ]
+                                                                                        },
+                                                                                        {
+                                                                                            $eq: [
+                                                                                                "$$agenda.user",
+                                                                                                this.userId
+                                                                                            ]
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    0
+                                                                ]
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            }
+                                        }
                                     },
                                     activeCollaboratorsSet: {
                                         $addToSet: {
